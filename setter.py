@@ -69,7 +69,7 @@ class SelectionSetList():
         
 test_set_list = SelectionSetList()
 test_set_list.load_from_xml('sets.xml')
-test_set_list.print_all()
+#test_set_list.print_all()
 
 
 class Collection_Saver():
