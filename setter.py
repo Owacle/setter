@@ -2,8 +2,8 @@
 # Does some expanding of collections that maya does of the form [a:b] where a....b represents a range
 
 #import maya.cmds as cmds
-import xml.etree.ElementTree as ET
 import os
+import xml.etree.ElementTree as ET
 
 class SelectionSet():
     '''
@@ -22,7 +22,8 @@ class SelectionSet():
         return self._items
     
     def add_items(self, items):
-        self._items.append(items)
+        for each in items:
+            self.add_item(each)
     
     def add_item(self, item):
         self._items.append(item)
@@ -36,25 +37,28 @@ class SelectionSet():
     def print_set(self):
         print('%s'%self._name)
         for item in self._items:
-            print '   '+item
-        print (' ')*10
+            print('  %s'%item)
 
 class SelectionSetList():
     '''
     this is a collection of SelectionSet() objects
     '''
     
-    def __init__(self, filename=''):
+    def __init__(self):
         self._all_sel_sets=[]
             #convenience item to potentially speed things up later for large number of sets
         self._num_lists = 0
-        if len(filename)>0:
-            self.load_from_xml(filename)
+        self._tree = ''
         
+    
     def load_from_xml(self, filename):
-        tree = ET.parse(filename)
-        root = tree.getroot()
+        if len(filename) == 0:
+            print('no file specified')
+            return
+        self._tree = ET.parse(filename)
+        root = self._tree.getroot()
         for each in root.getchildren():
+            self._num_lists += 1
             new_set = SelectionSet()
             #each is a whole set
             new_set.set_name(each.get('name'))
@@ -62,6 +66,30 @@ class SelectionSetList():
                 new_set.add_item(item.text)
             self._all_sel_sets.append(new_set)
     
+    def write_to_xml(self, filename):
+        if(len(filename)==0):
+            print 'no file specified'
+            return
+        self._tree.write(filename)
+        
+    def add_set(self, name, list_items):
+        print('adding a list called %s'%name)
+        print(list_items)
+        new_set = SelectionSet()
+        new_set.set_name(name)
+        new_set.add_items(list_items)
+        self._all_sel_sets.append(new_set)
+        root = self._tree.getroot()
+        new_el = ET.Element('set')
+        new_el.set('name',name)
+        for each in list_items:
+            new_sub = ET.Element('item')
+            new_sub.text = each
+            new_el.append(new_sub)
+        #attrib={name:})
+        root.append(new_el)
+        
+        
     def print_all(self):
         for one_set in self._all_sel_sets:
             one_set.print_set()
@@ -69,7 +97,17 @@ class SelectionSetList():
         
 test_set_list = SelectionSetList()
 test_set_list.load_from_xml('sets.xml')
-#test_set_list.print_all()
+
+test_set_list.print_all()
+test_set_list.add_set(name='bobby:', list_items=['head','tail','another'])
+test_set_list.print_all()
+test_set_list.write_to_xml('sets_out.xml')
+
+btest_set_list = SelectionSetList()
+btest_set_list.load_from_xml('sets_out.xml')
+btest_set_list.print_all()
+btest_set_list.add_set(name='one more', list_items=['foot', 'toe'])
+btest_set_list.write_to_xml('sets_out.xml')
 
 
 class Collection_Saver():
