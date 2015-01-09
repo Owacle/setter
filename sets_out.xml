@@ -1,0 +1,9 @@
+<sets>
+	<set name="drac">
+		<item>head.top</item>
+		<item>hand.something</item>
+	</set>
+	<set name="mavis">
+		<item>point[234]</item>
+	</set>
+<set name="bobby"><item>head</item><item>tail</item><item>another</item></set><set name="one more"><item>foot</item><item>toe</item></set></sets>

@@ -1,7 +1,7 @@
 <sets>
 	<set name="drac">
 		<item>head.top</item>
-		<item>hand.something</item>
+		<item>hand|something</item>
 	</set>
 	<set name="mavis">
 		<item>point[234]</item>
