@@ -182,13 +182,6 @@ class SelectionSetList():
                 expanded_what.append(each)
         return expanded_what
 
-    # this wont work because its not a dictionary anymore
-
-    # def replace_collection(self, which_collection, what):
-    #     new_what = self.expand_maya_set(what)
-    #     self._collections[which_collection] = new_what
-
-
     def replace_set(self, index, what):
         '''
         Accepts a SelectionSet object and replaces the index specified 
@@ -227,49 +220,21 @@ class SelectionSetList():
         # new_what = self.expand_maya_set(what)
         # self._collections[which_collection] = [x for x in orig if x not in new_what]
 
-    def get_blind_collection(self, which_collection):
-        ''' not sure I remember what this is supposed to do'''
-        print 'not sure - pass'
-        # full_name_collection = self._collections[which_collection]
-        # blind_collection = []
-        # for each in full_name_collection:
-        #     blind_collection.append(each.partition('.')[2])
-        # return blind_collection
-
     def get_collection(self, index):
         '''
         think it should try and work with lists and a SelectionSet object
         Returns a SelectionSet()
         '''
-        print 'get collection: '+str(index)
         if len(self._collections) > index:
             return self._collections[index]
-        # if self._collections[which_collection] == ['empty']:
-        #     return None
-        # else:
-        #     return self._collections[which_collection]
 
     def get_all(self):
         return self._collections
 
+    def rename_set(self, index, name):
+        self._collections[index].set_name(name)
+
 ## end of class  ---- Collection_Saver()
-            
-        
-# test_set_list = SelectionSetList()
-# path_full = os.path.dirname(__file__)
-# test_set_list.load_from_xml(path_full+'/sets.xml')
-# test_set_list.print_all()
-
-# test_set_list.add_set(name='bobby', list_items=['head','tail','another'])
-# test_set_list.print_all()
-# test_set_list.write_to_xml(path_full+'/sets_out.xml')
-
-# btest_set_list = SelectionSetList()
-# btest_set_list.load_from_xml(path_full+'/sets_out.xml')
-# btest_set_list.print_all()
-# btest_set_list.add_set(name='one more', list_items=['foot', 'toe'])
-# btest_set_list.write_to_xml(path_full+'/sets_out.xml')
-
 
 class Collection_Saver():
     '''A class for doing the majority of the handling of the selection lists'''
@@ -277,7 +242,6 @@ class Collection_Saver():
     def __init__(self):
         self._all_sel_sets = SelectionSetList()
         self._pwd = os.path.dirname(__file__)
-        # self.write_xml_buttons()
 
     def load_collections_xml(self, filename):
         '''
@@ -286,77 +250,24 @@ class Collection_Saver():
         # returns a list of SelectionSet objects
         self._all_sel_sets.load_from_xml(self._pwd+'/'+filename)
 
-
-        # loaded_collections = {'A':['empty'], 'B':['empty'], 'C':['empty'], 'D':['empty'], 'E':['empty']}
-        # # first go and see if there is one
-        # # if there isn't, make one
-        #     # return an empty set of collections
-        
-        # return loaded_collections
-        # if there is, load it
-            # return the loaded collections
- 
     def write_collections_xml(self, filename):
         '''
         write the same thing but this time in XML format somehow
         '''
         self._all_sel_sets.write_to_xml(self._pwd+'/'+filename)
 
-        # alltabs = []
-        # window_element = ET.Element('sets')
-        # for set_group in self._collections:
-        #     print set_group
-        #     tab_element = ET.SubElement(window_element, 
-        #                                     tag='selection_set', 
-        #                                     title=str(set_group))
-            # for item in set_group[key]:
-            #     print item
-            # for button in tab.all_buttons():
-            #     button_element = ET.SubElement(tab_element, 
-            #                       tag='button', 
-            #                       label=button.get_name(), 
-            #                       left=str(button.get_left()),
-            #                       top=str(button.get_top()),
-            #                       height=str(button.get_height()),
-            #                       width=str(button.get_width()),
-            #                       bgcol=button.get_bgcol_str(),
-            #                       command=str(button.get_command()))
-            #     if button.get_command() == 'select':
-            #         all_items = ''
-            #         for item in button.get_items():
-            #             all_items += str(item) + '\n\t\t\t\t'
-            #         item_element = ET.SubElement(button_element, tag='items')
-            #         item_element.text = all_items[:-5] # -5 to strip the new line and last set of tabs
-            #     else:   
-            #         for item in button.get_items():
-            #             min_max = button.get_min_max(item)
-            #             clean_item = button.get_item_only(item)
-            #             #we still want to put in the min and max for relevant items
-            #             if min_max:
-            #                 item_element = ET.SubElement(button_element, 
-            #                                              tag='item', 
-                                                           
-            #                                              min=min_max[0], 
-            #                                              max=min_max[1])
-            #                 item_element.text = clean_item
-            #             else:
-            #                 item_element = ET.SubElement(button_element, 
-            #                                              tag='item', 
-            #                                              value='coming_soon')
-            #                 item_element.text = clean_item
-        # tree = ET.ElementTree(window_element)
-        # # tree.write(self._pwd+'/output.xml')
-        # file_name = self._pwd+'/outputnice.xml'
-        # with open(file_name, 'w') as openfile:
-        #     openfile.write(self.prettify(window_element))
-        # openfile.close()
+    def modifier_pressed(self):
+        '''
+        return the string associated with the currently held modifier key
+        '''
+        mods = cmds.getModifiers()
+        return_list = []
+        if (mods & 1) > 0: return_list.append('SHIFT')
+        if (mods & 2) > 0: return_list.append('CAPSLOCK')
+        if (mods & 4) > 0: return_list.append('CONTROL')
+        if (mods & 8) > 0: return_list.append('ALT')
 
-
-    # def show_all_collections(saver_obj):
-    #     def show_all_sub(*args):
-    #         for line in saver_obj.get_all():
-    #             print line
-    #     return show_all_sub
+        return return_list
 
     def output_to_xml(self, filename):
         def output_sub(*args):
@@ -368,16 +279,29 @@ class Collection_Saver():
             self._all_sel_sets.write_to_xml(self._pwd+'/'+filename)
         return output_sub
 
+
+    def select_with_mods(self, items):
+        mods = self.modifier_pressed()
+        if 'SHIFT' in mods:
+            if 'CONTROL' in mods:
+                #both - so deselect
+                cmds.select(items, deselect=True)
+            else:
+                cmds.select(items, add=True)
+        elif 'CONTROL' in mods:
+            cmds.select(items, tgl=True)
+        else:
+            cmds.select(items)
+
     def load_save_set(self, index, operation='save',label='no_label'):
         def save_sub(*args):
             '''
             general purpose button press function to load/save/edit the collections
-
             '''
             coll = self._all_sel_sets.get_collection(index)
             if operation == 'load' and (coll != None):
                 items = coll.get_existing_items()
-                cmds.select(items)
+                self.select_with_mods(items)
             elif operation == 'deselect' and (coll != None):
                 cmds.select(coll, deselect=True)
             else:
@@ -389,8 +313,6 @@ class Collection_Saver():
                     self._all_sel_sets.replace_set_from_list(index, label, seled)
                     self.write_collections_xml('sets_out_mega.xml')
                     print 'text_label is: '+label
-                    if len(label)>0:
-                        cmds.text([label], edit=True, backgroundColor=[1,1,1])
                 elif operation == 'add':
                     self._all_sel_sets.add_to_collection(index, seled)
                 elif operation == 'remove':
@@ -399,17 +321,35 @@ class Collection_Saver():
                     print 'unknown operation'
         return save_sub
 
+    def rename(self, index):
+        def rename_sub(*args):
+            ''' rename the current index'''
+            result = cmds.promptDialog(title='Rename Object',
+                                        message='Enter Name:',
+                                        button=['OK', 'Cancel'],
+                                        defaultButton='OK',
+                                        cancelButton='Cancel',
+                                        dismissString='Cancel')
+            if result == 'OK':
+                text = cmds.promptDialog(query=True, text=True)
+                cmds.button( self.set_buttons[index], label=text, edit=True)
+                self._all_sel_sets.rename_set(index, text)
+
+        return rename_sub
+
     def make_set_buttons(self, set_name, index, col=[0.8,0.8,0.8]):
 
-        saver = self._all_sel_sets
-        set_name_bkt = '['+set_name+']'
+        #saver = self._all_sel_sets
+        #set_name_bkt = '['+set_name+']'
 
         dim_col = [(x*0.2)+0.2 for x in col]
-        text_label = cmds.text(label='*',
+        
+        text_label = cmds.text(label='.',
                                backgroundColor=[0.2,0.2,0.2])
         #cmds.text(label=set_name_bkt,
         #          backgroundColor=col)
-        cmds.button( label=set_name_bkt, 
+        
+        main_set_button = cmds.button( label=set_name, 
                      backgroundColor=col,
                      command=self.load_save_set(index=index,
                                            operation='load'))
@@ -417,8 +357,7 @@ class Collection_Saver():
                      backgroundColor=dim_col,
                      #enableBackground=False,
                      command=self.load_save_set(index=index,
-                                           operation='save',
-                                           label=text_label))
+                                           operation='save'))
         cmds.button( label=' + ', 
                      backgroundColor=dim_col,
                      command=self.load_save_set(index=index,
@@ -427,32 +366,38 @@ class Collection_Saver():
                      backgroundColor=dim_col,
                      command=self.load_save_set(index=index,
                                            operation='remove'))
-        cmds.button( label='Select', 
-                     backgroundColor=dim_col,
-                     command=self.load_save_set(index=index,
-                                           operation='load'))
-        cmds.button( label='Deselect', 
-                     backgroundColor=dim_col,
-                     command=self.load_save_set(index=index,
-                                           operation='deselect'))
+        cmds.button( label='rename', 
+                     command=self.rename(index=index))
+        
+        return main_set_button
 
     def show(self):
         if cmds.window("SelectionSets", exists=True):
             cmds.deleteUI("SelectionSets")
 
-        saver = self._all_sel_sets
         mainwindow = cmds.window("SelectionSets", title="Selections", height=100)
-        
-        cmds.rowColumnLayout(numberOfColumns=7, columnWidth=[(1, 20), 
+
+        self.set_buttons = []
+        form_main = cmds.formLayout(numberOfDivisions=100)
+
+        rows = cmds.rowColumnLayout(numberOfColumns=6, columnWidth=[(1, 20), 
                                                              (2, 80), 
                                                              (3, 50),
                                                              (4, 30),
                                                              (5, 30),
-                                                             (6, 60), 
-                                                             (7, 60)])
+                                                             (6, 60)])
+        cmds.formLayout(form_main,
+                        edit=True,
+                        attachForm=((rows, 'top', 0), (rows, 'left', 0)))
+
         for i, item in enumerate(self._all_sel_sets.get_all()):
-            self.make_set_buttons(set_name=item.get_name(), index=i, col=[0.8,0.2,0.2])
-        cmds.button( label='.')
+            self.set_buttons.append( self.make_set_buttons(set_name=item.get_name(), index=i, col=[0.8,0.2,0.2]) )
+
+        cmds.setParent('..')
+        extra_rows = cmds.rowColumnLayout(numberOfColumns=2)
+        cmds.formLayout(form_main,
+                        edit=True,
+                        attachForm=((extra_rows, 'top', 48), (extra_rows, 'left', 197)))
         cmds.button( label='save to xml', 
                      command=self.output_to_xml('sets_out_mega.xml'))
 
