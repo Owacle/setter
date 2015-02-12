@@ -61,6 +61,9 @@ class SelectionSetList():
         self._num_lists = 0
         self._tree = ''
         
+    def size(self):
+        return self._num_lists
+
     def load_from_xml(self, filename):
         '''
         loads a file from disk into a list of SelectionSet objects
@@ -120,6 +123,8 @@ class SelectionSetList():
         
         # add the set to the list of sets
         self._collections.append(new_set)
+
+        self._num_lists += 1
         
         # update the xml tree with the same thing, ready for writing out
         root = self._tree.getroot()
@@ -220,6 +225,11 @@ class SelectionSetList():
         # new_what = self.expand_maya_set(what)
         # self._collections[which_collection] = [x for x in orig if x not in new_what]
 
+    def remove_collection(self, index):
+        self._collections.pop(index)
+        self._num_lists -= 1
+
+
     def get_collection(self, index):
         '''
         think it should try and work with lists and a SelectionSet object
@@ -233,6 +243,8 @@ class SelectionSetList():
 
     def rename_set(self, index, name):
         self._collections[index].set_name(name)
+
+
 
 ## end of class  ---- Collection_Saver()
 
@@ -337,6 +349,25 @@ class Collection_Saver():
 
         return rename_sub
 
+
+    def delete(self, index):
+        def delete_sub(*args):
+            ''' rename the current index'''
+            # result = cmds.promptDialog(title='Rename Object',
+            #                             message='Enter Name:',
+            #                             button=['OK', 'Cancel'],
+            #                             defaultButton='OK',
+            #                             cancelButton='Cancel',
+            #                             dismissString='Cancel')
+            # if result == 'OK':
+                # text = cmds.promptDialog(query=True, text=True)
+                # cmds.button( self.set_buttons[index], label=text, edit=True)
+            
+            self._all_sel_sets.remove_collection(index)
+            self.show()
+
+        return delete_sub
+
     def make_set_buttons(self, set_name, index, col=[0.8,0.8,0.8]):
 
         #saver = self._all_sel_sets
@@ -366,40 +397,80 @@ class Collection_Saver():
                      backgroundColor=dim_col,
                      command=self.load_save_set(index=index,
                                            operation='remove'))
-        cmds.button( label='rename', 
+        cmds.button( label='ren', 
                      command=self.rename(index=index))
+
+        cmds.button( label='del', 
+                     command=self.delete(index=index))
         
         return main_set_button
+
+    def add_row(self, which_rowlayout):
+        def add_row_sub(*args):
+            # cmds.rowColumnLayout(which_rowlayout, edit=True)
+            # self.make_set_buttons(set_name='test_row', index=3, col=[0.8,0.2,0.2])
+
+
+            self._all_sel_sets.add_set('new_set', 'sphere1')
+            self.show()
+
+        return add_row_sub
 
     def show(self):
         if cmds.window("SelectionSets", exists=True):
             cmds.deleteUI("SelectionSets")
 
-        mainwindow = cmds.window("SelectionSets", title="Selections", height=100)
+        this_window_height = (self._all_sel_sets.size() * 24) + 40
+
+        mainwindow = cmds.window("SelectionSets", title="Selections", height=this_window_height)
 
         self.set_buttons = []
-        form_main = cmds.formLayout(numberOfDivisions=100)
 
-        rows = cmds.rowColumnLayout(numberOfColumns=6, columnWidth=[(1, 20), 
-                                                             (2, 80), 
-                                                             (3, 50),
-                                                             (4, 30),
-                                                             (5, 30),
-                                                             (6, 60)])
-        cmds.formLayout(form_main,
-                        edit=True,
-                        attachForm=((rows, 'top', 0), (rows, 'left', 0)))
+        form_main = cmds.formLayout(numberOfDivisions=100)
+        
+        label_rows = cmds.rowLayout(numberOfColumns=2, columnWidth2=(50,100), adjustableColumn2=2)
+        # rows = cmds.rowColumnLayout(numberOfColumns=7, 
+        #                             columnWidth=[(1,10),(2,80),(3, 50),(4, 30), (5, 30),(6, 30),(7, 30)],
+        #                             columnAttach=[(1,'left',0),(2,'both',0),(7,'right',5)])
+        
+        cols = cmds.columnLayout()
+
+        cmds.text(label='three', align='left')
+        cmds.text(label='four', align='left')
+        cmds.text(label='five', align='left')
+        cmds.text(label='six', align='left')
+        cmds.text(label='seven', align='left')
+        cmds.text(label='eight', align='left')
+
+        cmds.setParent('..')
+        
+        rows = cmds.rowColumnLayout(numberOfColumns=7, 
+                                    columnWidth=[(1,10),(2,80),(3, 50),(4, 30), (5, 30),(6, 30)])
 
         for i, item in enumerate(self._all_sel_sets.get_all()):
             self.set_buttons.append( self.make_set_buttons(set_name=item.get_name(), index=i, col=[0.8,0.2,0.2]) )
+        
+        cmds.formLayout(form_main,
+                        edit=True,
+                        attachForm=((label_rows, 'top', 0), (label_rows, 'right', 5)))
+        # cmds.rowLayout(label_rows,
+        #                 edit=True,
+        #                 attachForm=((rows, 'top', 0), (rows, 'left', 5)))
+        
+        
 
+        
+        
+        cmds.setParent('..')
         cmds.setParent('..')
         extra_rows = cmds.rowColumnLayout(numberOfColumns=2)
         cmds.formLayout(form_main,
                         edit=True,
-                        attachForm=((extra_rows, 'top', 48), (extra_rows, 'left', 197)))
+                        attachForm=((extra_rows, 'bottom', 5), (extra_rows, 'right', 5)))
         cmds.button( label='save to xml', 
                      command=self.output_to_xml('sets_out_mega.xml'))
+        cmds.button( label='add new set', 
+                     command=self.add_row(rows))
 
         cmds.showWindow(mainwindow)
 

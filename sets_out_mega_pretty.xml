@@ -208,4 +208,50 @@
 			pSphere1
 		</item>
 	</set>
+	<set name="new_set">
+		<item>
+			s
+		</item>
+		<item>
+			p
+		</item>
+		<item>
+			h
+		</item>
+		<item>
+			e
+		</item>
+		<item>
+			r
+		</item>
+		<item>
+			e
+		</item>
+		<item>
+			1
+		</item>
+	</set>
+	<set name="new_set">
+		<item>
+			s
+		</item>
+		<item>
+			p
+		</item>
+		<item>
+			h
+		</item>
+		<item>
+			e
+		</item>
+		<item>
+			r
+		</item>
+		<item>
+			e
+		</item>
+		<item>
+			1
+		</item>
+	</set>
 </sets>
