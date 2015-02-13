@@ -231,27 +231,12 @@
 			1
 		</item>
 	</set>
-	<set name="new_set">
+	<set name="curve and pyramid">
 		<item>
-			s
+			curve1
 		</item>
 		<item>
-			p
-		</item>
-		<item>
-			h
-		</item>
-		<item>
-			e
-		</item>
-		<item>
-			r
-		</item>
-		<item>
-			e
-		</item>
-		<item>
-			1
+			pPyramid1
 		</item>
 	</set>
 </sets>

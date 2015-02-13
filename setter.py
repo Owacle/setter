@@ -91,9 +91,10 @@ class SelectionSetList():
         if(len(filename)==0):
             print 'no file specified'
             return
-        self._tree.write(filename)
+        #self._tree.write(filename)
         #also writes a semi pretty one
-        with open(filename[:-4]+'_pretty.xml', 'w') as openfile:
+        #with open(filename[:-4]+'_pretty.xml', 'w') as openfile:
+        with open(filename, 'w') as openfile:
             openfile.write(self.prettify(self._tree.getroot()))
         openfile.close()
     
@@ -468,12 +469,12 @@ class Collection_Saver():
                         edit=True,
                         attachForm=((extra_rows, 'bottom', 5), (extra_rows, 'right', 5)))
         cmds.button( label='save to xml', 
-                     command=self.output_to_xml('sets_out_mega.xml'))
+                     command=self.output_to_xml('sets.xml'))
         cmds.button( label='add new set', 
                      command=self.add_row(rows))
 
         cmds.showWindow(mainwindow)
 
 my_saver = Collection_Saver()
-my_saver.load_collections_xml('sets_out_mega.xml')
+my_saver.load_collections_xml('sets.xml')
 my_saver.show()
