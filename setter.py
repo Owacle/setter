@@ -26,8 +26,6 @@ class SelectionSet():
         first check that the items exist before you do the return
         I think this could be a pre-processing step
         '''
-        # test_list = ['head.top', 'hand|something', 'another']
-        # return_list = [x for x in test_list if cmds.objExists(x)]
         return_list = [x for x in self._items if cmds.objExists(x)]
 
         return return_list
@@ -81,7 +79,8 @@ class SelectionSetList():
             #each is a whole set
             new_set.set_name(each.get('name'))
             for item in each.getchildren():
-                new_set.add_item(item.text)
+                #print item.text.strip(),
+                new_set.add_item(item.text.strip())
             self._collections.append(new_set)
     
     def write_to_xml(self, filename):
@@ -91,9 +90,6 @@ class SelectionSetList():
         if(len(filename)==0):
             print 'no file specified'
             return
-        #self._tree.write(filename)
-        #also writes a semi pretty one
-        #with open(filename[:-4]+'_pretty.xml', 'w') as openfile:
         with open(filename, 'w') as openfile:
             openfile.write(self.prettify(self._tree.getroot()))
         openfile.close()
@@ -114,8 +110,6 @@ class SelectionSetList():
         used to add a named set to the list of sets
         also adds the same to the xml tree
         '''
-        # print('adding a list called %s'%name)
-        # print(list_items)
         
         # make a new set object and put the items into it
         new_set = SelectionSet()
@@ -151,10 +145,6 @@ class SelectionSetList():
                 new_sub.text = one_item
                 new_el.append(new_sub)
         self._tree = ET.ElementTree(root)
-        # new_tree = 
-        # temp_pwd = os.path.dirname(__file__)
-        # new_tree.write(temp_pwd+'/output_test_mega.xml')
-        
 
     def get_set_by_name(self, name):
         set_names = [x.get_name() for x in self._collections] 
@@ -164,7 +154,6 @@ class SelectionSetList():
     def print_all(self):
         for one_set in self._collections:
             one_set.print_set()
-
 
     def expand_maya_set(self, what):
         '''
@@ -210,21 +199,12 @@ class SelectionSetList():
         think it should try and work with lists and a SelectionSet object
         '''
         print 'add to collection: '+what
-        # new_what = self.expand_maya_set(what)
-        # if self._collections[which_collection] == ['empty']:
-        #     self._collections[which_collection] = new_what
-        # else:
-        #     self._collections[which_collection] += new_what
 
     def remove_from_collection(self, which_collection, what):
         '''
         think it should try and work with lists and a SelectionSet object
         '''
         print 'remove from collection: '+what
-
-        # orig = self._collections[which_collection]
-        # new_what = self.expand_maya_set(what)
-        # self._collections[which_collection] = [x for x in orig if x not in new_what]
 
     def remove_collection(self, index):
         self._collections.pop(index)
@@ -314,7 +294,12 @@ class Collection_Saver():
             coll = self._all_sel_sets.get_collection(index)
             if operation == 'load' and (coll != None):
                 items = coll.get_existing_items()
-                self.select_with_mods(items)
+                
+                try:
+                    self.select_with_mods(items)
+                except Exception, e:
+                    print 'None of the [%i] items are in the scene'%len(coll.get_items())#raise e
+                    
             elif operation == 'deselect' and (coll != None):
                 cmds.select(coll, deselect=True)
             else:
@@ -322,7 +307,6 @@ class Collection_Saver():
                 if not seled:
                     print 'nothing selected - think about clearing'
                 elif operation == 'save':
-                    #self._all_sel_sets.replace_collection(index,seled)
                     self._all_sel_sets.replace_set_from_list(index, label, seled)
                     self.write_collections_xml('sets_out_mega.xml')
                     print 'text_label is: '+label
@@ -345,7 +329,7 @@ class Collection_Saver():
                                         dismissString='Cancel')
             if result == 'OK':
                 text = cmds.promptDialog(query=True, text=True)
-                cmds.button( self.set_buttons[index], label=text, edit=True)
+                cmds.text( self.set_buttons[index], label=text, edit=True)
                 self._all_sel_sets.rename_set(index, text)
 
         return rename_sub
@@ -353,41 +337,32 @@ class Collection_Saver():
 
     def delete(self, index):
         def delete_sub(*args):
-            ''' rename the current index'''
-            # result = cmds.promptDialog(title='Rename Object',
-            #                             message='Enter Name:',
-            #                             button=['OK', 'Cancel'],
-            #                             defaultButton='OK',
-            #                             cancelButton='Cancel',
-            #                             dismissString='Cancel')
-            # if result == 'OK':
-                # text = cmds.promptDialog(query=True, text=True)
-                # cmds.button( self.set_buttons[index], label=text, edit=True)
-            
-            self._all_sel_sets.remove_collection(index)
-            self.show()
+            '''delete the item after confirming'''
+            result = cmds.confirmDialog(title='DELETE this set ?',
+                                        button=['YES', 'NO'],
+                                        defaultButton='YES',
+                                        cancelButton='NO',
+                                        dismissString='NO')
+            if result == 'OK':
+                self._all_sel_sets.remove_collection(index)
+                self.show()
 
         return delete_sub
 
     def make_set_buttons(self, set_name, index, col=[0.8,0.8,0.8]):
-
-        #saver = self._all_sel_sets
-        #set_name_bkt = '['+set_name+']'
+        '''makes a row of buttons for each set in the set of sets'''
 
         dim_col = [(x*0.2)+0.2 for x in col]
-        
-        text_label = cmds.text(label='.',
-                               backgroundColor=[0.2,0.2,0.2])
-        #cmds.text(label=set_name_bkt,
-        #          backgroundColor=col)
-        
-        main_set_button = cmds.button( label=set_name, 
+ 
+        text_label = cmds.text(label=set_name)
+
+
+        main_set_button = cmds.button( label='sel', 
                      backgroundColor=col,
                      command=self.load_save_set(index=index,
                                            operation='load'))
         cmds.button( label='Save', 
                      backgroundColor=dim_col,
-                     #enableBackground=False,
                      command=self.load_save_set(index=index,
                                            operation='save'))
         cmds.button( label=' + ', 
@@ -403,16 +378,13 @@ class Collection_Saver():
 
         cmds.button( label='del', 
                      command=self.delete(index=index))
-        
-        return main_set_button
+
+        return text_label
 
     def add_row(self, which_rowlayout):
         def add_row_sub(*args):
-            # cmds.rowColumnLayout(which_rowlayout, edit=True)
-            # self.make_set_buttons(set_name='test_row', index=3, col=[0.8,0.2,0.2])
 
-
-            self._all_sel_sets.add_set('new_set', 'sphere1')
+            self._all_sel_sets.add_set('new_set', 'front')
             self.show()
 
         return add_row_sub
@@ -429,51 +401,36 @@ class Collection_Saver():
 
         form_main = cmds.formLayout(numberOfDivisions=100)
         
-        label_rows = cmds.rowLayout(numberOfColumns=2, columnWidth2=(50,100), adjustableColumn2=2)
-        # rows = cmds.rowColumnLayout(numberOfColumns=7, 
-        #                             columnWidth=[(1,10),(2,80),(3, 50),(4, 30), (5, 30),(6, 30),(7, 30)],
-        #                             columnAttach=[(1,'left',0),(2,'both',0),(7,'right',5)])
-        
-        cols = cmds.columnLayout()
-
-        cmds.text(label='three', align='left')
-        cmds.text(label='four', align='left')
-        cmds.text(label='five', align='left')
-        cmds.text(label='six', align='left')
-        cmds.text(label='seven', align='left')
-        cmds.text(label='eight', align='left')
-
-        cmds.setParent('..')
-        
         rows = cmds.rowColumnLayout(numberOfColumns=7, 
-                                    columnWidth=[(1,10),(2,80),(3, 50),(4, 30), (5, 30),(6, 30)])
+                                    columnWidth=[(2,30),(3, 50),(4, 30), (5, 30),(6, 30)],
+                                    columnAlign=(1,'left'),
+                                    columnAttach=(1,'both',10))
 
+        # make a row for each set
         for i, item in enumerate(self._all_sel_sets.get_all()):
             self.set_buttons.append( self.make_set_buttons(set_name=item.get_name(), index=i, col=[0.8,0.2,0.2]) )
         
         cmds.formLayout(form_main,
                         edit=True,
-                        attachForm=((label_rows, 'top', 0), (label_rows, 'right', 5)))
-        # cmds.rowLayout(label_rows,
-        #                 edit=True,
-        #                 attachForm=((rows, 'top', 0), (rows, 'left', 5)))
-        
-        
+                        attachForm=((rows, 'top', 5), (rows, 'right', 10)))
 
         
-        
         cmds.setParent('..')
         cmds.setParent('..')
+
+        # now make the buttons at the bottom for saving and adding rows
         extra_rows = cmds.rowColumnLayout(numberOfColumns=2)
         cmds.formLayout(form_main,
                         edit=True,
-                        attachForm=((extra_rows, 'bottom', 5), (extra_rows, 'right', 5)))
+                        attachForm=((extra_rows, 'bottom', 5), (extra_rows, 'right', 10)))
         cmds.button( label='save to xml', 
                      command=self.output_to_xml('sets.xml'))
         cmds.button( label='add new set', 
                      command=self.add_row(rows))
 
         cmds.showWindow(mainwindow)
+
+# END of collection saver class
 
 my_saver = Collection_Saver()
 my_saver.load_collections_xml('sets.xml')

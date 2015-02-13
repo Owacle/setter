@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sets>
-	<set name="no_label">
+	<set name="lots of verts">
 		<item>
 			pSphere1.vtx[11]
 		</item>
@@ -203,40 +203,27 @@
 			pSphere1.vtx[236]
 		</item>
 	</set>
-	<set name="no_label">
+	<set name="sphere">
 		<item>
 			pSphere1
 		</item>
 	</set>
-	<set name="new_set">
-		<item>
-			s
-		</item>
-		<item>
-			p
-		</item>
-		<item>
-			h
-		</item>
-		<item>
-			e
-		</item>
-		<item>
-			r
-		</item>
-		<item>
-			e
-		</item>
-		<item>
-			1
-		</item>
-	</set>
-	<set name="curve and pyramid">
+	<set name="curve and pyramid only">
 		<item>
 			curve1
 		</item>
 		<item>
 			pPyramid1
+		</item>
+	</set>
+	<set name="just pyramid">
+		<item>
+			pPyramid1
+		</item>
+	</set>
+	<set name="no_label">
+		<item>
+			curve1
 		</item>
 	</set>
 </sets>
